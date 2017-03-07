@@ -15,8 +15,8 @@ namespace asgn5v1
 	public class Transformer : System.Windows.Forms.Form
 	{
 		private System.ComponentModel.IContainer components;
-		//private bool GetNewData();
-
+        //private bool GetNewData();
+        bool rotating = false;
 		// basic data for Transformer
 
 		int numpts = 0;
@@ -499,6 +499,17 @@ namespace asgn5v1
             return matrix;
         }
 
+        double[,] shear(string direction)
+        {
+            double[,] A = new double[4, 4];
+            setIdentity(A, 4, 4);
+            if (direction == "left")
+                A[1, 0] = 0.1d;
+            else if (direction == "right")
+                A[1, 0] = -0.1d;
+            return A;
+        }
+
         void MenuNewDataOnClick(object obj, EventArgs ea)
 		{
 			//MessageBox.Show("New Data item clicked.");
@@ -627,27 +638,32 @@ namespace asgn5v1
 		{
 			if (e.Button == transleftbtn)
 			{
+                rotating = false;
                 ctrans = MultiplyMatrix(ctrans, translate(-75, 0, 0));
                 Refresh();
 			}
 			if (e.Button == transrightbtn) 
 			{
+                rotating = false;
                 ctrans = MultiplyMatrix(ctrans, translate(75, 0, 0));
                 Refresh();
 			}
 			if (e.Button == transupbtn)
 			{
+                rotating = false;
                 ctrans = MultiplyMatrix(ctrans, translate(0, -35, 0));
                 Refresh();
 			}
 			
 			if(e.Button == transdownbtn)
 			{
+                rotating = false;
                 ctrans = MultiplyMatrix(ctrans, translate(0, 35, 0));
                 Refresh();
 			}
 			if (e.Button == scaleupbtn) 
 			{
+                rotating = false;
                 //translate to origin
                 ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
                 //apply uniform scale
@@ -658,6 +674,7 @@ namespace asgn5v1
 			}
 			if (e.Button == scaledownbtn) 
 			{
+                rotating = false;
                 //translate to origin
                 ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
                 //apply uniform scale
@@ -668,6 +685,7 @@ namespace asgn5v1
 			}
 			if (e.Button == rotxby1btn) 
 			{
+                rotating = false;
                 //translate to origin
                 ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
                 //apply rotation in x-axis
@@ -678,6 +696,7 @@ namespace asgn5v1
             }
 			if (e.Button == rotyby1btn) 
 			{
+                rotating = false;
                 //translate to origin
                 ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
                 //apply rotation in y-axis
@@ -688,6 +707,7 @@ namespace asgn5v1
             }
 			if (e.Button == rotzby1btn) 
 			{
+                rotating = false;
                 //translate to origin
                 ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
                 //apply rotation in z-axis
@@ -699,36 +719,78 @@ namespace asgn5v1
 
 			if (e.Button == rotxbtn) 
 			{
-				
-			}
+                rotating = true;
+                while (rotating == true)
+                {
+                    ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
+                    ctrans = MultiplyMatrix(ctrans, rotateIn('x'));
+                    ctrans = MultiplyMatrix(ctrans, translate(scrnpts[0, 0], scrnpts[0, 1], scrnpts[0, 2]));
+                    Refresh();
+                    //slow down rotation
+                    System.Threading.Thread.Sleep(100);
+                    Application.DoEvents();
+                }
+            }
 			if (e.Button == rotybtn) 
 			{
-				
-			}
+                rotating = true;
+                while (rotating == true)
+                {
+                    ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
+                    ctrans = MultiplyMatrix(ctrans, rotateIn('y'));
+                    ctrans = MultiplyMatrix(ctrans, translate(scrnpts[0, 0], scrnpts[0, 1], scrnpts[0, 2]));
+                    Refresh();
+                    System.Threading.Thread.Sleep(100);
+                    Application.DoEvents();
+                }
+            }
 			
 			if (e.Button == rotzbtn) 
 			{
-				
-			}
+                rotating = true;
+                while (rotating == true)
+                {
+                    ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[0, 0], -scrnpts[0, 1], -scrnpts[0, 2]));
+                    ctrans = MultiplyMatrix(ctrans, rotateIn('z'));
+                    ctrans = MultiplyMatrix(ctrans, translate(scrnpts[0, 0], scrnpts[0, 1], scrnpts[0, 2]));
+                    Refresh();
+                    System.Threading.Thread.Sleep(100);
+                    Application.DoEvents();
+                }
+            }
 
-			if(e.Button == shearleftbtn)
-			{
-				Refresh();
-			}
+            if (e.Button == shearleftbtn)
+            {
+                rotating = false;
+                //translate to origin
+                ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[16, 0], -scrnpts[16, 1], -scrnpts[0, 2]));
+                ctrans = MultiplyMatrix(ctrans, shear("left"));
+                //translate back
+                ctrans = MultiplyMatrix(ctrans, translate(scrnpts[16, 0], scrnpts[16, 1], scrnpts[0, 2]));
+                Refresh();
+            }
 
-			if (e.Button == shearrightbtn) 
-			{
-				Refresh();
-			}
+            if (e.Button == shearrightbtn)
+            {
+                rotating = false;
+                //translate to origin
+                ctrans = MultiplyMatrix(ctrans, translate(-scrnpts[16, 0], -scrnpts[16, 1], -scrnpts[0, 2]));
+                ctrans = MultiplyMatrix(ctrans, shear("right"));
+                //translate back
+                ctrans = MultiplyMatrix(ctrans, translate(scrnpts[16, 0], scrnpts[16, 1], scrnpts[0, 2]));
+                Refresh();
+            }
 
-			if (e.Button == resetbtn)
+            if (e.Button == resetbtn)
 			{
-				RestoreInitialImage();
+                rotating = false;
+                RestoreInitialImage();
 			}
 
 			if(e.Button == exitbtn) 
 			{
-				Close();
+                rotating = false;
+                Close();
 			}
 
 		}
